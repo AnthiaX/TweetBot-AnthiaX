@@ -40,16 +40,17 @@ app.post('/tweet', async (req, res) => {
   const request_data = {
     url: 'https://api.twitter.com/2/tweets',
     method: 'POST',
-    data: { text: tweetText },
   };
+
+  const oauthHeader = oauth.toHeader(oauth.authorize(request_data, token));
 
   try {
     const response = await axios.post(
       request_data.url,
-      request_data.data,
+      { text: tweetText }, // POST body should still be JSON
       {
         headers: {
-          ...oauth.toHeader(oauth.authorize(request_data, token)),
+          Authorization: oauthHeader.Authorization, // Use the generated header
           'Content-Type': 'application/json',
         },
       }
@@ -65,7 +66,7 @@ app.post('/tweet', async (req, res) => {
   }
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 TweetBot running on port ${PORT}`);
 });
